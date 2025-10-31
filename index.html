@@ -18,6 +18,13 @@
             animation: gradientShift 8s ease infinite;
             min-height: 100vh;
             overflow-x: hidden;
+            /* 禁止右键菜单和选择 */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         @keyframes gradientShift {
@@ -122,6 +129,30 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 15px;
+            /* 禁止图片下载保护 */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            pointer-events: none;
+        }
+
+        /* 图片保护层 */
+        .image-protection {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 10;
+            cursor: default;
             border-radius: 15px;
         }
 
@@ -386,8 +417,8 @@
     <div class="main-container">
         <!-- 头部标题 -->
         <header class="header">
-            <h1 class="main-title">心花绽放</h1>
-            <p class="subtitle">记录美好时光，珍藏温馨回忆</p>
+            <!-- <h1 class="main-title">心花绽放</h1> -->
+            <h1>记录美好时光，珍藏温馨回忆</h1>
         </header>
 
         <!-- 主要内容区域 -->
@@ -395,50 +426,12 @@
             <!-- 图片轮播区域 -->
             <div class="carousel-container">
                 <div class="carousel" id="carousel">
-                    <div class="carousel-slide active">
-                        <img src="images/R0004755.jpg" alt="美好回忆 1">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="images/R0004755_01.JPG" alt="美好回忆 2">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="images/R0004757.jpg" alt="美好回忆 3">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="images/R0004757_01.JPG" alt="美好回忆 4">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="images/R0004811.jpg" alt="美好回忆 5">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="images/R0004811_01.JPG" alt="美好回忆 6">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="images/R0004815.jpg" alt="美好回忆 7">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="images/R0004815_01.JPG" alt="美好回忆 8">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="images/R0004820.jpg" alt="美好回忆 9">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="images/R0004820_01.JPG" alt="美好回忆 10">
-                    </div>
+                    <!-- 图片将通过 JavaScript 动态生成 -->
                 </div>
                 
                 <!-- 导航点 -->
                 <div class="carousel-dots" id="carouselDots">
-                    <span class="dot active" data-slide="0"></span>
-                    <span class="dot" data-slide="1"></span>
-                    <span class="dot" data-slide="2"></span>
-                    <span class="dot" data-slide="3"></span>
-                    <span class="dot" data-slide="4"></span>
-                    <span class="dot" data-slide="5"></span>
-                    <span class="dot" data-slide="6"></span>
-                    <span class="dot" data-slide="7"></span>
-                    <span class="dot" data-slide="8"></span>
-                    <span class="dot" data-slide="9"></span>
+                    <!-- 导航点将通过 JavaScript 动态生成 -->
                 </div>
             </div>
 
@@ -446,35 +439,140 @@
             <div class="heart-section">
                 <div class="center-heart"></div>
                 <div class="romantic-text" id="romanticText">
-                    <span class="line">时光荏苒如流水</span>
+                    <!-- <span class="line">时光荏苒如流水</span>
                     <span class="line">唯有真情永不变</span>
                     <span class="line">愿此心如花绽放</span>
-                    <span class="line">伴君共度好时光</span>
+                    <span class="line">伴君共度好时光</span> -->
                 </div>
             </div>
         </main>
     </div>
 
     <script>
+        // 图片资源保护和混淆
+        const IMAGE_KEYS = ['a1b2c3', 'd4e5f6', 'g7h8i9', 'j0k1l2', 'm3n4o5'];
+        const IMAGE_MAP = new Map();
+        
+        // 动态生成图片路径（混淆处理）
+        function initImageMap() {
+            const baseNames = [
+                '929CC4CE-A747-4565-8349-083257897893_1_105_c.jpeg',
+                'AE24F6C5-D044-45CF-83AC-290BD85E2775.webp',
+                'CBC1BA9F-0C65-489A-9FBA-9A3F95CE1953.webp',
+                'DC7A179F-3241-44C7-8B5F-576D329FEE85_1_105_c.jpeg',
+                'EF9C962F-7A5A-4A20-A1DE-36239DF1FB39_1_105_c.jpeg'
+            ];
+            
+            baseNames.forEach((name, index) => {
+                IMAGE_MAP.set(IMAGE_KEYS[index], name);
+            });
+        }
+        
+        // 获取混淆后的图片列表
+        const ALL_IMAGES = IMAGE_KEYS;
+
+        // 获取当前显示的图片列表（自动适应图片数量）
+        function getCurrentImageList(startIndex = 0) {
+            const maxDisplayImages = 6;
+            const totalImages = ALL_IMAGES.length;
+            
+            // 如果图片总数不超过最大显示数量，直接返回所有图片
+            if (totalImages <= maxDisplayImages) {
+                return ALL_IMAGES;
+            }
+            
+            // 如果图片数量超过最大显示数量，返回轮播的6张图片
+            const imageList = [];
+            for (let i = 0; i < maxDisplayImages; i++) {
+                const index = (startIndex + i) % totalImages;
+                imageList.push(ALL_IMAGES[index]);
+            }
+            
+            return imageList;
+        }
+
         // 图片轮播功能
         class Carousel {
-            constructor() {
+            constructor(imageList) {
                 this.currentSlide = 0;
+                this.imageList = imageList;
+                this.totalSlides = imageList.length;
+                this.autoPlayInterval = null;
+                this.slides = [];
+                this.dots = [];
+                this.imageSetIndex = 0; // 当前图片组的起始索引
+                this.maxDisplayImages = 6; // 最多显示6个图片
+                this.totalImages = ALL_IMAGES.length; // 总图片数量
+                
+                this.createCarouselStructure();
+                this.init();
+            }
+
+            createCarouselStructure() {
+                const carousel = document.getElementById('carousel');
+                const carouselDots = document.getElementById('carouselDots');
+                
+                // 清空现有内容
+                carousel.innerHTML = '';
+                carouselDots.innerHTML = '';
+                
+                // 生成图片轮播结构
+                this.imageList.forEach((imageKey, index) => {
+                    // 创建图片滑块
+                    const slide = document.createElement('div');
+                    slide.className = `carousel-slide${index === 0 ? ' active' : ''}`;
+                    
+                    const img = document.createElement('img');
+                    // 使用混淆的图片路径
+                    const realImageName = IMAGE_MAP.get(imageKey);
+                    if (realImageName) {
+                        // 动态加载图片并添加防缓存参数
+                        const timestamp = Date.now();
+                        const randomParam = Math.random().toString(36).substring(7);
+                        img.src = `images/${realImageName}?t=${timestamp}&r=${randomParam}`;
+                        
+                        // 添加图片加载保护
+                        img.onload = function() {
+                            // 图片加载完成后立即清除src属性中的真实路径信息
+                            setTimeout(() => {
+                                this.removeAttribute('data-original-src');
+                            }, 100);
+                        };
+                    }
+                    
+                    img.alt = `美好回忆 ${index + 1}`;
+                    img.onerror = function() {
+                        console.warn(`图片加载失败`);
+                        this.style.display = 'none';
+                    };
+                    
+                    // 添加额外的图片属性混淆
+                    img.setAttribute('data-protected', 'true');
+                    img.setAttribute('data-key', imageKey);
+                    
+                    // 创建保护层
+                    const protection = document.createElement('div');
+                    protection.className = 'image-protection';
+                    
+                    slide.appendChild(img);
+                    slide.appendChild(protection);
+                    carousel.appendChild(slide);
+                    
+                    // 创建导航点
+                    const dot = document.createElement('span');
+                    dot.className = `dot${index === 0 ? ' active' : ''}`;
+                    dot.setAttribute('data-slide', index);
+                    carouselDots.appendChild(dot);
+                });
+                
+                // 更新引用
                 this.slides = document.querySelectorAll('.carousel-slide');
                 this.dots = document.querySelectorAll('.dot');
-                this.totalSlides = this.slides.length;
-                this.autoPlayInterval = null;
-                
-                this.init();
             }
 
             init() {
                 // 绑定导航点点击事件
-                this.dots.forEach((dot, index) => {
-                    dot.addEventListener('click', () => {
-                        this.goToSlide(index);
-                    });
-                });
+                this.bindEvents();
 
                 // 开始自动播放
                 this.startAutoPlay();
@@ -490,6 +588,8 @@
             }
 
             goToSlide(slideIndex) {
+                if (slideIndex < 0 || slideIndex >= this.totalSlides) return;
+                
                 // 移除当前活动状态
                 this.slides[this.currentSlide].classList.remove('active');
                 this.dots[this.currentSlide].classList.remove('active');
@@ -502,7 +602,45 @@
 
             nextSlide() {
                 const nextIndex = (this.currentSlide + 1) % this.totalSlides;
-                this.goToSlide(nextIndex);
+                
+                // 只有在图片总数超过最大显示数量时才进行图片组切换
+                if (nextIndex === 0 && this.totalImages > this.maxDisplayImages) {
+                    this.switchToNextImageSet();
+                } else {
+                    this.goToSlide(nextIndex);
+                }
+            }
+
+            // 切换到下一组图片
+            switchToNextImageSet() {
+                // 只有在图片总数超过最大显示数量时才执行切换
+                if (this.totalImages <= this.maxDisplayImages) {
+                    return;
+                }
+                
+                this.imageSetIndex = (this.imageSetIndex + this.maxDisplayImages) % this.totalImages;
+                this.imageList = getCurrentImageList(this.imageSetIndex);
+                this.totalSlides = this.imageList.length;
+                this.currentSlide = 0;
+                
+                console.log(`切换到图片组 ${Math.floor(this.imageSetIndex / this.maxDisplayImages) + 1}:`, this.imageList);
+                
+                // 重新创建轮播结构
+                this.createCarouselStructure();
+                
+                // 重新绑定事件监听器
+                this.bindEvents();
+            }
+
+            // 绑定事件监听器的独立方法
+            bindEvents() {
+                // 绑定导航点点击事件
+                this.dots.forEach((dot, index) => {
+                    dot.addEventListener('click', () => {
+                        console.log(`点击导航点 ${index}`);
+                        this.goToSlide(index);
+                    });
+                });
             }
 
             startAutoPlay() {
@@ -575,10 +713,157 @@
             });
         }
 
+        // 开发者工具检测
+        function detectDevTools() {
+            let devtools = {
+                open: false,
+                orientation: null
+            };
+            
+            const threshold = 160;
+            
+            setInterval(() => {
+                if (window.outerHeight - window.innerHeight > threshold || 
+                    window.outerWidth - window.innerWidth > threshold) {
+                    if (!devtools.open) {
+                        devtools.open = true;
+                        // 检测到开发者工具打开时的处理
+                        document.body.style.display = 'none';
+                        alert('请关闭开发者工具后刷新页面');
+                    }
+                } else {
+                    devtools.open = false;
+                }
+            }, 500);
+            
+            // 检测控制台
+            let consoleCheck = () => {
+                let start = new Date();
+                debugger;
+                let end = new Date();
+                if (end - start > 100) {
+                    document.body.style.display = 'none';
+                    alert('请关闭开发者工具后刷新页面');
+                }
+            };
+            
+            setInterval(consoleCheck, 1000);
+        }
+        
+        // 图片资源动态混淆
+        function obfuscateImageSources() {
+            setInterval(() => {
+                const images = document.querySelectorAll('img[data-protected="true"]');
+                images.forEach(img => {
+                    if (img.src && img.src.includes('images/')) {
+                        // 动态更改图片URL参数
+                        const url = new URL(img.src);
+                        url.searchParams.set('_', Math.random().toString(36).substring(7));
+                        url.searchParams.set('ts', Date.now());
+                        img.src = url.toString();
+                    }
+                });
+            }, 3000);
+        }
+        
+        // 图片保护功能
+        function initImageProtection() {
+            // 禁止右键菜单
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // 禁止拖拽
+            document.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // 禁止选择
+            document.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // 禁止键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                // 禁止 F12 (开发者工具)
+                if (e.keyCode === 123) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // 禁止 Ctrl+S (保存)
+                if (e.ctrlKey && e.keyCode === 83) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // 禁止 Ctrl+A (全选)
+                if (e.ctrlKey && e.keyCode === 65) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // 禁止 Ctrl+U (查看源代码)
+                if (e.ctrlKey && e.keyCode === 85) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // 禁止 Ctrl+Shift+I (开发者工具)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // 禁止 Ctrl+Shift+J (控制台)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // 禁止 Ctrl+Shift+C (元素选择器)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // 禁止打印
+            window.addEventListener('beforeprint', function(e) {
+                e.preventDefault();
+                return false;
+            });
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化轮播
-            new Carousel();
+            // 初始化图片映射
+            initImageMap();
+            
+            // 启用所有保护功能
+            initImageProtection();
+            detectDevTools();
+            obfuscateImageSources();
+            
+            try {
+                // 使用静态图片列表初始化轮播
+                const imageList = getCurrentImageList();
+                console.log('使用图片:', imageList);
+                
+                if (imageList.length > 0) {
+                    new Carousel(imageList);
+                } else {
+                    console.warn('未找到任何图片文件');
+                    // 显示提示信息
+                    const carousel = document.getElementById('carousel');
+                    carousel.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-size: 1.2rem;">暂无图片</div>';
+                }
+            } catch (error) {
+                console.error('初始化轮播时出错:', error);
+            }
             
             // 开始文字动画
             animateText();
